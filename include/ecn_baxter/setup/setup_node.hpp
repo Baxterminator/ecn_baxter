@@ -39,12 +39,17 @@ class SetupNode : public rclcpp::Node {
 public:
   explicit SetupNode(NodeOptions opts);
 
+  static std::thread action_th;
+  static sig_atomic_t stop_cmd;
+
 protected:
   Step current_step = 0;
   std::vector<std::string> names;
   std::vector<game::data::ArmSide> sides;
   bool pushed = false, publish = false;
   Point last_point;
+
+  
 
   sptr<Subscription<NavigatorStates>> states_sub;
 

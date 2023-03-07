@@ -109,13 +109,23 @@ target_include_directories(gripper_node PRIVATE
 )
 add_message(gripper_node)
 
-## Setup Node
-ament_auto_add_executable(setup_node src/setup/setup_node.cpp)
+## Setup Server
+ament_auto_add_library(setup_node SHARED src/setup/setup_node.cpp)
 target_include_directories(setup_node PRIVATE
-        include
+    include
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include
+    $<INSTALL_INTERFACE:include>
 )
+target_compile_definitions(setup_node PRIVATE "ECN_BAXTER_BUILDING_DLL")
+rclcpp_components_register_node(setup_node PLUGIN "ecn_baxter::setup::SetupNode" EXECUTABLE setup_server)
 add_message(setup_node)
+install(TARGETS
+    setup_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
+## Game Properties
 ament_auto_add_library(game_properties 
     src/game/data/local_games.cpp
     src/game/data/game_properties.cpp

@@ -25,6 +25,6 @@ public:
 private:
   sptr<ros::NodeHandle> _handle;
 };
-}; // namespace ecn_baxter::game::ros1
+} // namespace ecn_baxter::game::ros1
 
 #endif // GAME_MASTER_1_HPP

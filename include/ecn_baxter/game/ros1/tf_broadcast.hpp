@@ -14,14 +14,14 @@
 #include "ros/publisher.h"
 #include "ros/wall_timer.h"
 #include <ecn_baxter/utils.hpp>
-#include <geometry_msgs/TransformStamped.h>
+#include <tf2_msgs/TFMessage.h>
 #include <geometry_msgs/msg/point.hpp>
 #include <ros/node_handle.h>
 #include <vector>
 
 namespace ecn_baxter::game::ros1 {
-using geometry_msgs::TransformStamped;
 using geometry_msgs::msg::Point;
+using tf2_msgs::TFMessage;
 
 class TFBroadcaster {
 private:
@@ -32,7 +32,7 @@ private:
   ros::Publisher _tf_publisher;
   static const std::string _tf_topic;
   static const int _queue_size = 10;
-  std::vector<TransformStamped> _to_broadcast;
+  std::vector<TFMessage> _to_broadcast;
 
   void broadcast_transforms() const;
 
@@ -44,7 +44,7 @@ protected:
   ros::WallTimer _tf_broadcast_timer;
 
 public:
-  void add_tf(const TransformStamped &);
+  void add_tf(const TFMessage &);
 };
 
 } // namespace ecn_baxter::game::ros1

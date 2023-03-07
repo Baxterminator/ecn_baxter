@@ -18,7 +18,7 @@ void TFBroadcaster::tf_broadcast_init(sptr<ros::NodeHandle> handle) {
       dur, [this]([[maybe_unused]] const ros::WallTimerEvent &event) {
         broadcast_transforms();
       });
-  _tf_publisher = handle->advertise<TransformStamped>(_tf_topic, _queue_size);
+  _tf_publisher = handle->advertise<TFMessage>(_tf_topic, _queue_size);
 }
 
 /// @brief Publish all saved markers to the TF tree of the robot
@@ -28,7 +28,7 @@ void TFBroadcaster::broadcast_transforms() const {
 }
 
 /// @brief Add a transform to the broadcast list
-void TFBroadcaster::add_tf(const TransformStamped &tf) {
+void TFBroadcaster::add_tf(const TFMessage &tf) {
   _to_broadcast.push_back(tf);
 }
 } // namespace ecn_baxter::game::ros1

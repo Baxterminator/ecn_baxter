@@ -4,6 +4,11 @@
 #include <thread>
 
 namespace ecn_baxter {
+
+std::thread SetupNode::action_th;
+sig_atomic_t SetupNode::stop_cmd;
+
+
 SetupNode::SetupNode(rclcpp::NodeOptions opts)
     : rclcpp::Node("setup_node", opts), tf_buffer(get_clock()),
       tf_listener(tf_buffer) {
@@ -33,35 +38,34 @@ CancelResponse SetupNode::handle_cancel(const sptr<PtnHandle> goal_handle) {
   return CancelResponse::ACCEPT;
 }
 GoalResponse
-SetupNode::handle_goal(const GoalUUID &uuid,
+SetupNode::handle_goal([[maybe_unused]]const GoalUUID &uuid,
                        [[maybe_unused]] sptr<const PointsSetup::Goal> goal) {
   RCLCPP_INFO(this->get_logger(), "Received goal request");
-  (void)uuid;
   return GoalResponse::ACCEPT_AND_EXECUTE;
 }
 void SetupNode::handle_accepted(const sptr<PtnHandle> goal_handle) {
-  auto th = std::thread{[&]() { ptn_setup_exec(goal_handle); }};
+  action_th = std::thread{[&]() { ptn_setup_exec(goal_handle); }};
   RCLCPP_INFO(get_logger(), "Launching setup action on thread");
-  th.detach();
-}
-
-void convertSides(const std::vector<bool> &ori,
-                  std::vector<game::data::ArmSide> &dest) {
-  dest.resize(0);
-  for (auto b : ori) {
-    if (b == PointsSetup::Goal::LEFT) {
-      dest.push_back(game::data::ArmSide::LEFT_ARM);
-    } else if (b == PointsSetup::Goal::RIGHT) {
-      dest.push_back(game::data::ArmSide::RIGHT_ARM);
-    }
-  }
 }
 
 void SetupNode::ptn_setup_exec(const sptr<PtnHandle> handle) {
+
   RCLCPP_INFO(get_logger(), "Start exec");
-  names = handle->get_goal()->ptns_name;
+  RCLCPP_INFO(get_logger(), "Start exec");
+  RCLCPP_INFO(get_logger(), "Start exec");
+  std::this_thread::sleep_for(2000ms);
+  RCLCPP_INFO(get_logger(), "Start exec 2");
+  RCLCPP_INFO(get_logger(), "Start exec 2");
+  RCLCPP_INFO(get_logger(), "Start exec 2");
+  RCLCPP_INFO(get_logger(), "Start exec 2");
+  auto const goal = handle->get_goal();
+  names = goal->ptns_name;
+
   RCLCPP_INFO(get_logger(), "Convert sides");
-  convertSides(handle->get_goal()->sides, sides);
+  sides = std::vector<game::data::ArmSide>(0);
+  for (bool b : handle->get_goal()->sides) {
+    sides.push_back(game::data::bool2side(b));
+  }
   current_step = 0;
 
   RCLCPP_INFO(get_logger(), "Before loop");
@@ -79,6 +83,8 @@ void SetupNode::ptn_setup_exec(const sptr<PtnHandle> handle) {
       publish = false;
     }
 
+    if (stop_cmd)
+      break;
     std::this_thread::sleep_for(50ms);
   }
 
@@ -140,5 +146,8 @@ int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<ecn_baxter::SetupNode>(rclcpp::NodeOptions{}));
   rclcpp::shutdown();
+  ecn_baxter::SetupNode::stop_cmd = 1;
+  if (ecn_baxter::SetupNode::action_th.joinable())
+    ecn_baxter::SetupNode::action_th.join();
   return 0;
 }
