@@ -35,6 +35,8 @@ SetupNode::SetupNode(rclcpp::NodeOptions opts)
 CancelResponse SetupNode::handle_cancel(const sptr<PtnHandle> goal_handle) {
   RCLCPP_INFO(get_logger(), "Request to cancel goal ");
   (void)goal_handle;
+  stop_cmd = 1;
+  action_th.join();
   return CancelResponse::ACCEPT;
 }
 GoalResponse
@@ -85,7 +87,7 @@ void SetupNode::ptn_setup_exec(const sptr<PtnHandle> handle) {
 
     if (stop_cmd)
       break;
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(200ms);
   }
 
   if (rclcpp::ok()) {

@@ -20,18 +20,18 @@ void SetupPointsClient::launch_point_setup(
   RCLCPP_INFO(logger, "Launching setup phase !");
 
   // Setup MSG
-  auto setup_msg = PointsSetup::Goal();
-  setup_msg.ptns_name = std::vector<std::string>(0);
-  setup_msg.sides = std::vector<bool>(0);
+  goal = PointsSetup::Goal();
+  goal.ptns_name = std::vector<std::string>(0);
+  goal.sides = std::vector<bool>(0);
 
   RCLCPP_INFO(logger, "Preparing %zu markers to setup",
               props->setup.needed_points.size());
   for (auto point : props->setup.needed_points) {
-    setup_msg.ptns_name.push_back(point.name);
-    setup_msg.sides.push_back(game::data::side2bool(point.arm_side));
+    goal.ptns_name.push_back(point.name);
+    goal.sides.push_back(game::data::side2bool(point.arm_side));
   }
 
-  auto goal_options = Client<PointsSetup>::SendGoalOptions();
+  goal_options = Client<PointsSetup>::SendGoalOptions();
   goal_options.goal_response_callback =
       [&](std::shared_future<PtnSetupHandler::SharedPtr> future) {
         ptn_setup_goal(future);
@@ -47,6 +47,6 @@ void SetupPointsClient::launch_point_setup(
       };
 
   RCLCPP_INFO(logger, "Calling action server");
-  ptn_setup->async_send_goal(setup_msg, goal_options);
+  ptn_setup->async_send_goal(goal, goal_options);
 }
 } // namespace ecn_baxter::game::ros2

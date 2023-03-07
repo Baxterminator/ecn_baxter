@@ -33,6 +33,8 @@ public:
 protected:
   rclcpp::Logger logger;
   Client<PointsSetup>::SharedPtr ptn_setup;
+  Client<PointsSetup>::SendGoalOptions goal_options;
+  PointsSetup::Goal goal;
 
   /// @brief Callback of the acceptance of the action call
   /// @param future the future linked to the call of the action
